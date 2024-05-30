@@ -19,6 +19,7 @@
 #include <optional>
 #include <tuple>
 #include <format>
+#include <fmt/core.h>
 
 enum class OrderType
 {
@@ -72,13 +73,58 @@ public:
         , remainingQuantity_ {quantity}
     {}
 
-    OrderId GetOrderID() const { return orderId_; }
+    OrderId GetOrderId() const { return orderId_; }
     Side GetSide() const { return side_; }
     Price GetPrice() const { return price_;}
     OrderType GetOrderType() const { return orderType_;}
     Quantity GetInitialQuantity() const { return initialQuantity_; }
-    Quantity GetRemainingQuantity() const { return remainingQuantity; }
+    Quantity GetRemainingQuantity() const { return remainingQuantity_; }
     Quantity GetFilledQuantity() const { return GetInitialQuantity() - GetRemainingQuantity(); }
+    void Fill(Quantity quantity)
+    {
+        if (quantity > GetRemainingQuantity())
+            throw std::logic_error(fmt::format("Order ({}) can't be filled for more than its remaining quantity", GetOrderId()));
+        remainingQuantity_ -= quantity;
+    }
+
+private:
+    OrderType orderType_;
+    OrderId orderId_;
+    Side side_;
+    Price price_;
+    Quantity initialQuantity_;
+    Quantity remainingQuantity_;
+};
+
+using OrderPointer = std::shared_ptr<Order>;
+using OrderPointers = std::list<OrderPointer>;
+
+class OrderModify
+{
+public:
+    OrderModify(OrderId orderId, Side side, Price price, Quantity quantity)
+        : orderId_ { orderId }
+        , price_ { price }
+        , side_ { side }
+        , quantity_ { quantity }
+    {}
+
+    OrderId GetOrderId() const { return orderId_; }
+    Price GetPrice() const { return price_;}
+    Side GetSide() const { return side_; }
+    Quantity GetQuantity() const { return quantity_; }
+
+    OrderPointer ToOrderPointer(OrderType type) const
+    {
+        return std::make_shared<Order>(type, GetOrderId(), GetSide(), GetPrice(), GetQuantity());
+    }
+
+private:
+    OrderId orderId_;
+    Price price_;
+    Side side_;
+    Quantity quantity_;
+
 };
 
 
