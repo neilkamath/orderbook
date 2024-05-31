@@ -3,8 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "C:\\Users\\Neil\\C++PROJECTS\\fmt-10.2.0\\fmt-10.2.0\\include"
+                "${workspaceFolder}/**"
             ],
             "defines": [
                 "_DEBUG",
